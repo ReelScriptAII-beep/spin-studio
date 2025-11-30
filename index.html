@@ -6,77 +6,87 @@
 <title>Spin Studio</title>
 
 <style>
-  body{
-    font-family: Arial, sans-serif;
-    margin:0;
-    padding:0;
-    background:#f0f2f5;
-    display:flex;
-    justify-content:center;
-  }
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  padding:0;
+  background:#f0f2f5;
+  display:flex;
+  justify-content:center;
+}
 
-  .container{
-    width:95%;
-    max-width:420px;
-    margin-top:20px;
-    text-align:center;
-  }
+.container{
+  width:95%;
+  max-width:420px;
+  margin-top:20px;
+  text-align:center;
+}
 
-  .card{
-    background:white;
-    padding:18px;
-    border-radius:12px;
-    box-shadow:0 0 12px rgba(0,0,0,0.1);
-    margin-bottom:18px;
-  }
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 0 12px rgba(0,0,0,0.1);
+  margin-bottom:18px;
+}
 
-  #wheelCanvas{
-    margin-top:10px;
-  }
+#wheelCanvas{
+  margin-top:10px;
+}
 
-  button{
-    width:100%;
-    padding:12px;
-    border:none;
-    font-size:17px;
-    border-radius:10px;
-    background:#007bff;
-    color:white;
-    margin-top:10px;
-    cursor:pointer;
-  }
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  font-size:17px;
+  border-radius:10px;
+  background:#007bff;
+  color:white;
+  margin-top:10px;
+  cursor:pointer;
+}
 
-  button:active{ background:#005fcc; }
+button:active{ background:#005fcc; }
 
-  #result{
-    font-size:20px;
-    font-weight:600;
-    margin-top:12px;
-  }
+#result{
+  font-size:20px;
+  font-weight:600;
+  margin-top:12px;
+}
 
-  /* Customize box */
-  #editorSection{
-    display:none;
-    margin-top:10px;
-    background:#ffffff;
-    padding:12px;
-    border-radius:10px;
-    box-shadow:0 0 8px rgba(0,0,0,0.1);
-  }
+/* Customize box */
+#editorSection{
+  display:none;
+  margin-top:10px;
+  background:#ffffff;
+  padding:12px;
+  border-radius:10px;
+  box-shadow:0 0 8px rgba(0,0,0,0.1);
+}
 
-  textarea{
-    width:100%;
-    height:120px;
-    padding:10px;
-    border-radius:8px;
-    font-size:14px;
-    border:1px solid #ccc;
-  }
+textarea{
+  width:100%;
+  height:120px;
+  padding:10px;
+  border-radius:8px;
+  font-size:14px;
+  border:1px solid #ccc;
+}
+
+/* Monetag Ad Placeholder */
+#monetagAd{
+  width:100%;
+  margin:15px 0;
+  text-align:center;
+}
 </style>
+
+<!-- Monetag SDK -->
+<script src='//libtl.com/sdk.js' data-zone='10258271' data-sdk='show_10258271'></script>
+
 </head>
 
 <body>
-
 <div class="container">
 
   <div class="card">
@@ -85,9 +95,13 @@
 
     <button onclick="spinWheel()">SPIN</button>
 
-    <!-- CUSTOMIZE BUTTON BELOW SPIN -->
-    <button id="toggleEditor" onclick="toggleEditorSection()">Customize Wheel ▼</button>
+    <!-- Monetag Banner Ad -->
+    <div id="monetagAd">
+      <p style="color:#aaa; font-size:14px;">Loading ads...</p>
+    </div>
 
+    <!-- Customize Wheel Button -->
+    <button id="toggleEditor" onclick="toggleEditorSection()">Customize Wheel ▼</button>
     <div id="editorSection">
       <textarea id="customSegments">Reward 1
 Reward 2
@@ -99,17 +113,23 @@ Reward 6</textarea>
     </div>
 
     <div id="result">Result will appear here…</div>
+
+    <!-- Reward Ad Button -->
+    <button onclick="watchRewardedAd()">Watch Ad & Get Extra Spin</button>
+
   </div>
 </div>
 
 <audio id="winSound" src="https://assets.mixkit.co/sfx/download/mixkit-small-win-2020.wav"></audio>
 
 <script>
+// ================== Spin Wheel ==================
 let segments = ["Reward 1","Reward 2","Reward 3","Reward 4","Reward 5","Reward 6"];
 let startAngle = 0;
 let spinTimeout = null;
 let arc = Math.PI / (segments.length / 2);
 let ctx = document.getElementById("wheelCanvas").getContext("2d");
+let userSpins = 0;
 
 function drawWheel(){
   const colors=["#FF6F61","#6B5B95","#88B04B","#F7CAC9","#92A8D1","#955251"];
@@ -206,7 +226,33 @@ function toggleEditorSection(){
 }
 
 drawWheel();
-</script>
 
+// ================== Rewarded Popup ==================
+function watchRewardedAd(){
+  show_10258271('pop').then(() => {
+      userSpins++;
+      alert('🎉 You earned 1 extra spin!');
+  }).catch(e => {
+      console.log('Ad not watched or error occurred', e);
+  });
+}
+
+// ================== In-App Interstitial ==================
+function initInAppAds() {
+  show_10258271({
+    type: 'inApp',
+    inAppSettings: {
+      frequency: 2,    // 2 ads max
+      capping: 0.1,    // within 6 minutes
+      interval: 30,    // 30 sec gap
+      timeout: 5,      // 5 sec delay
+      everyPage: false // session not reset on page change
+    }
+  });
+}
+
+initInAppAds();
+
+</script>
 </body>
 </html>
