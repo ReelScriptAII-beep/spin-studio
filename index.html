@@ -6,187 +6,202 @@
 <title>Spin Studio</title>
 
 <style>
-  body {
+  body{
     font-family: Arial, sans-serif;
-    text-align: center;
-    background: #f5f5f5;
-    margin: 0;
-    padding: 20px;
+    margin:0;
+    padding:0;
+    background:#f0f2f5;
+    display:flex;
+    justify-content:center;
   }
 
-  #wheelCanvas {
-    margin-top: 20px;
+  .container{
+    width:95%;
+    max-width:420px;
+    margin-top:20px;
+    text-align:center;
   }
 
-  button {
-    padding: 10px 18px;
-    font-size: 16px;
-    border: none;
-    background: #007bff;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 10px;
+  .card{
+    background:white;
+    padding:18px;
+    border-radius:12px;
+    box-shadow:0 0 12px rgba(0,0,0,0.1);
+    margin-bottom:18px;
   }
 
-  button:active {
-    background: #005fcc;
+  #wheelCanvas{
+    margin-top:10px;
   }
 
-  #resultBox {
-    margin-top: 20px;
-    background: #fff;
-    padding: 12px;
-    border-radius: 10px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    font-size: 18px;
+  button{
+    width:100%;
+    padding:12px;
+    border:none;
+    font-size:17px;
+    border-radius:10px;
+    background:#007bff;
+    color:white;
+    margin-top:10px;
+    cursor:pointer;
   }
 
-  #editorSection {
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 0 6px rgba(0,0,0,0.1);
-    margin-top: 10px;
+  button:active{ background:#005fcc; }
+
+  #result{
+    font-size:20px;
+    font-weight:600;
+    margin-top:12px;
+  }
+
+  /* Customize box */
+  #editorSection{
+    display:none;
+    margin-top:10px;
+    background:#ffffff;
+    padding:12px;
+    border-radius:10px;
+    box-shadow:0 0 8px rgba(0,0,0,0.1);
+  }
+
+  textarea{
+    width:100%;
+    height:120px;
+    padding:10px;
+    border-radius:8px;
+    font-size:14px;
+    border:1px solid #ccc;
   }
 </style>
 </head>
 
 <body>
 
-<h2>🎡 Spin Studio</h2>
+<div class="container">
 
-<!-- ------------ CUSTOMIZE BUTTON ------------ -->
-<button id="toggleEditor" onclick="toggleEditorSection()">Customize Wheel ▼</button>
+  <div class="card">
+    <h2>🎡 Spin Studio</h2>
+    <canvas id="wheelCanvas" width="300" height="300"></canvas>
 
-<!-- ------------ CUSTOM EDITOR SECTION ------------ -->
-<div id="editorSection">
-  <h3>Customize Wheel</h3>
-  <textarea id="customSegments" rows="6" style="width:100%">Reward 1
+    <button onclick="spinWheel()">SPIN</button>
+
+    <!-- CUSTOMIZE BUTTON BELOW SPIN -->
+    <button id="toggleEditor" onclick="toggleEditorSection()">Customize Wheel ▼</button>
+
+    <div id="editorSection">
+      <textarea id="customSegments">Reward 1
 Reward 2
 Reward 3
 Reward 4
 Reward 5
 Reward 6</textarea>
+      <button onclick="applyCustomSegments()">Apply Changes</button>
+    </div>
 
-  <button onclick="applyCustomSegments()">Apply</button>
+    <div id="result">Result will appear here…</div>
+  </div>
 </div>
 
-<canvas id="wheelCanvas" width="300" height="300"></canvas>
-
-<button onclick="spinWheel()">SPIN</button>
-
-<div id="resultBox">Result will appear here…</div>
-
-<!-- WINNING SOUND -->
 <audio id="winSound" src="https://assets.mixkit.co/sfx/download/mixkit-small-win-2020.wav"></audio>
 
 <script>
-/* ---------------- DEFUALT SEGMENTS ---------------- */
 let segments = ["Reward 1","Reward 2","Reward 3","Reward 4","Reward 5","Reward 6"];
 let startAngle = 0;
 let spinTimeout = null;
-const arc = Math.PI / (segments.length / 2);
-const ctx = document.getElementById("wheelCanvas").getContext("2d");
+let arc = Math.PI / (segments.length / 2);
+let ctx = document.getElementById("wheelCanvas").getContext("2d");
 
-/* ---------------- DRAW WHEEL ---------------- */
-function drawWheel() {
-  const colors = ["#FF6F61","#6B5B95","#88B04B","#F7CAC9","#92A8D1","#955251"];
-  const canvas = document.getElementById("wheelCanvas");
+function drawWheel(){
+  const colors=["#FF6F61","#6B5B95","#88B04B","#F7CAC9","#92A8D1","#955251"];
+  const canvas=document.getElementById("wheelCanvas");
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  for (let i = 0; i < segments.length; i++) {
-    const angle = startAngle + i * arc;
-    ctx.fillStyle = colors[i % colors.length];
+  for(let i=0;i<segments.length;i++){
+    let angle=startAngle + i*arc;
+    ctx.fillStyle=colors[i % colors.length];
 
     ctx.beginPath();
-    ctx.moveTo(150, 150);
-    ctx.arc(150, 150, 150, angle, angle + arc);
-    ctx.lineTo(150, 150);
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,150,angle,angle+arc);
+    ctx.lineTo(150,150);
     ctx.fill();
 
     ctx.save();
-    ctx.translate(150, 150);
-    ctx.rotate(angle + arc / 2);
-    ctx.fillStyle = "white";
-    ctx.font = "15px Arial";
-    ctx.fillText(segments[i], 50, 5);
+    ctx.translate(150,150);
+    ctx.rotate(angle + arc/2);
+    ctx.fillStyle="white";
+    ctx.font="16px Arial";
+    ctx.fillText(segments[i],50,5);
     ctx.restore();
   }
 
-  // pointer triangle
-  ctx.fillStyle = "black";
+  ctx.fillStyle="black";
   ctx.beginPath();
-  ctx.moveTo(150, 0);
-  ctx.lineTo(140, 20);
-  ctx.lineTo(160, 20);
+  ctx.moveTo(150,0);
+  ctx.lineTo(140,25);
+  ctx.lineTo(160,25);
   ctx.closePath();
   ctx.fill();
 }
 
-/* ---------------- SPIN FUNCTION ---------------- */
 let spinAngleStart = 0;
 let spinTime = 0;
-let spinTimeTotal = 0;
+let spinTotal = 0;
 
-function spinWheel() {
-  spinAngleStart = Math.random() * 10 + 10;
+function spinWheel(){
+  spinAngleStart = Math.random()*10 + 15;
   spinTime = 0;
-  spinTimeTotal = Math.random() * 3000 + 4000;
+  spinTotal = Math.random()*3000 + 4000;
   rotateWheel();
 }
 
-function rotateWheel() {
+function rotateWheel(){
   spinTime += 20;
-
-  if (spinTime >= spinTimeTotal) {
+  if(spinTime >= spinTotal){
     stopRotateWheel();
     return;
   }
 
-  const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
-  startAngle += (spinAngle * Math.PI / 180);
+  let spinAngle = spinAngleStart - easeOut(spinTime,0,spinAngleStart,spinTotal);
+  startAngle += (spinAngle * Math.PI/180);
   drawWheel();
-  spinTimeout = setTimeout(rotateWheel, 20);
+  spinTimeout = setTimeout(rotateWheel,20);
 }
 
-function stopRotateWheel() {
+function stopRotateWheel(){
   clearTimeout(spinTimeout);
+  let degrees = startAngle * 180 / Math.PI + 90;
+  let index = Math.floor((360 - (degrees % 360)) / (360 / segments.length));
 
-  const degrees = startAngle * 180 / Math.PI + 90;
-  const index = Math.floor((360 - (degrees % 360)) / (360 / segments.length));
-
-  document.getElementById("resultBox").innerText =
-    "🎉 You Won: " + segments[index];
-
+  document.getElementById("result").innerText = "🎉 You Won: " + segments[index];
   document.getElementById("winSound").play();
 }
 
-function easeOut(t, b, c, d) {
-  t /= d;
+function easeOut(t,b,c,d){
+  t/=d;
   return -c * t*(t-2) + b;
 }
 
-/* --------------- APPLY CUSTOM SEGMENTS --------------- */
-function applyCustomSegments() {
-  const text = document.getElementById("customSegments").value.trim();
-  segments = text.split("\n").filter(x => x.trim() !== "");
+/* Apply custom */
+function applyCustomSegments(){
+  let txt = document.getElementById("customSegments").value.trim();
+  segments = txt.split("\n").filter(x => x.trim() !== "");
+  arc = Math.PI / (segments.length/2);
   drawWheel();
-  alert("Wheel Updated!");
 }
 
-/* --------------- TOGGLE CUSTOMIZE SECTION --------------- */
-function toggleEditorSection() {
-  const section = document.getElementById('editorSection');
-  const btn = document.getElementById('toggleEditor');
+/* Toggle */
+function toggleEditorSection(){
+  const box=document.getElementById("editorSection");
+  const btn=document.getElementById("toggleEditor");
 
-  if (section.style.display === 'none') {
-    section.style.display = 'block';
-    btn.innerText = 'Customize Wheel ▼';
+  if(box.style.display==="none"){
+    box.style.display="block";
+    btn.innerText="Customize Wheel ▼";
   } else {
-    section.style.display = 'none';
-    btn.innerText = 'Customize Wheel ▲';
+    box.style.display="none";
+    btn.innerText="Customize Wheel ▲";
   }
 }
 
