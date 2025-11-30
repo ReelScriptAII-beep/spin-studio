@@ -8,8 +8,7 @@
     body {margin:0; font-family: Arial, sans-serif; background:#f5f6fa; padding:16px;}
     .container {max-width:480px; margin:auto; background:#fff; padding:20px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.1);}
     h2 {text-align:center; margin-bottom:16px; font-size:22px;}
-    .label {display:block; margin-bottom:6px; font-weight:600; font-size:14px;}
-    input, textarea, select, button {width:100%; border-radius:12px; border:1px solid #ddd; padding:12px; font-size:16px; margin-top:10px;}
+    input, button {width:100%; border-radius:12px; border:1px solid #ddd; padding:12px; font-size:16px; margin-top:10px;}
     button {background:#4b7bec; color:#fff; font-weight:bold; border:none; cursor:pointer;}
     button:active {opacity:0.8;}
     .wheel-container {position:relative; margin:20px 0; width:100%; height:300px;}
@@ -37,6 +36,7 @@
   </div>
 
   <div class="output-box" id="output">Result will appear here...</div>
+  <button id="shareBtn" onclick="shareResult()">Share Result</button>
 </div>
 
 <script>
@@ -44,6 +44,7 @@ let segments = ['Win','Lose','Try Again','Yes','No'];
 let angle = 0; let spinning = false;
 const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
+const winSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_22f0e9b31f.mp3?filename=big-explosion-126444.mp3');
 
 function drawWheel(){
   const size = canvas.width = canvas.height = 300;
@@ -82,8 +83,8 @@ function spinWheel(){
       spinning=false;
       const winner = segments[Math.floor((segments.length - Math.floor((angle%(2*Math.PI))/(2*Math.PI/segments.length)))%segments.length)];
       document.getElementById('output').innerText = '🎉 Result: '+winner;
-      if(navigator.vibrate) navigator.vibrate(100);
-      new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_7e671c5f15.mp3?filename=wheel-spin-113337.mp3').play();
+      if(navigator.vibrate) navigator.vibrate([200,100,200]);
+      winSound.play();
     }
   }
   animate();
@@ -127,6 +128,22 @@ function toggleEditorSection(){
   } else {
     section.style.display='none';
     btn.innerText='Customize Wheel ▲';
+  }
+}
+
+function shareResult() {
+  const resultText = document.getElementById('output').innerText;
+  if (navigator.share) {
+    navigator.share({
+      title: 'Spin Studio 🎡',
+      text: resultText + ' - Check out my Spin Studio spin!',
+      url: window.location.href
+    }).then(() => console.log('Shared successfully'))
+      .catch((err) => console.log('Share cancelled', err));
+  } else {
+    navigator.clipboard.writeText(resultText + ' - Try it here: ' + window.location.href)
+      .then(() => alert('Result copied! Share it with your friends.'))
+      .catch(() => alert('Could not copy, please share manually.'));
   }
 }
 
