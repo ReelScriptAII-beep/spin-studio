@@ -29,8 +29,8 @@
   </div>
   <button onclick="spinWheel()">SPIN</button>
 
-  <div class="editor-section">
-    <h3>Customize Wheel</h3>
+  <button id="toggleEditor" onclick="toggleEditorSection()">Customize Wheel ▼</button>
+  <div class="editor-section" id="editorSection">
     <input id="segmentInput" placeholder="Enter segment text" />
     <button onclick="addSegment()">Add Segment</button>
     <div id="segmentList"></div>
@@ -118,7 +118,18 @@ function updateSegmentList(){
   });
 }
 
-// Load saved wheel from LocalStorage
+function toggleEditorSection(){
+  const section = document.getElementById('editorSection');
+  const btn = document.getElementById('toggleEditor');
+  if(section.style.display==='none'){
+    section.style.display='block';
+    btn.innerText='Customize Wheel ▼';
+  } else {
+    section.style.display='none';
+    btn.innerText='Customize Wheel ▲';
+  }
+}
+
 if(localStorage.getItem('wheelSegments')){
   segments = JSON.parse(localStorage.getItem('wheelSegments'));
   updateSegmentList();
