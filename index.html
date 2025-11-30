@@ -36,7 +36,6 @@
   </div>
 
   <div class="output-box" id="output">Result will appear here...</div>
-  <button id="shareBtn" onclick="shareResult()">Share Result</button>
 </div>
 
 <script>
@@ -128,22 +127,6 @@ function toggleEditorSection(){
   } else {
     section.style.display='none';
     btn.innerText='Customize Wheel ▲';
-  }
-}
-
-function shareResult() {
-  const resultText = document.getElementById('output').innerText;
-  if (navigator.share) {
-    navigator.share({
-      title: 'Spin Studio 🎡',
-      text: resultText + ' - Check out my Spin Studio spin!',
-      url: window.location.href
-    }).then(() => console.log('Shared successfully'))
-      .catch((err) => console.log('Share cancelled', err));
-  } else {
-    navigator.clipboard.writeText(resultText + ' - Try it here: ' + window.location.href)
-      .then(() => alert('Result copied! Share it with your friends.'))
-      .catch(() => alert('Could not copy, please share manually.'));
   }
 }
 
