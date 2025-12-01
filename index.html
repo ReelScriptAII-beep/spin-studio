@@ -1,474 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Spin Studio — 2 Wheels + Coins + Wallet</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spin Studio</title>
 
 <style>
-  :root{
-    --bg:#0f1724;
-    --card:#0b1220;
-    --neon1:#6C63FF; /* purple */
-    --neon2:#00C2FF; /* cyan/blue */
-    --accent:#ff6fb1;
-    --muted:#9aa4b2;
-  }
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#061024 0%, #0f1724 100%);font-family:Inter,Arial,sans-serif;color:#e6eef8;}
-  .wrap{max-width:920px;margin:18px auto;padding:16px;display:grid;grid-template-columns:1fr;gap:14px;}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:14px;box-shadow:0 6px 24px rgba(12,16,30,0.6);border:1px solid rgba(108,99,255,0.06);}
-  .header{display:flex;align-items:center;gap:12px}
-  .logo{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--neon1),var(--neon2));display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:20px}
-  h1{margin:0;font-size:20px}
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  .col{flex:1;min-width:260px}
-  canvas{width:100%;height:260px;border-radius:12px;display:block;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);box-shadow:inset 0 6px 18px rgba(0,0,0,0.4);}
-  button{background:linear-gradient(90deg,var(--neon2),var(--neon1));color:#021025;border:none;padding:12px 14px;border-radius:10px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(100,80,255,0.12)}
-  small{color:var(--muted)}
-  .muted{color:var(--muted);font-size:13px}
-  .controls{display:flex;gap:8px;align-items:center;margin-top:10px}
-  textarea{width:100%;height:86px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-  .wallet{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));}
-  .small-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;color:var(--neon1);cursor:pointer}
-  ul{margin:8px 0 0 16px;padding:0}
-  .history-list{max-height:120px;overflow:auto;padding:6px;border-radius:8px;background:rgba(255,255,255,0.01)}
-  .leaderboard{display:flex;flex-direction:column;gap:6px}
-  .lb-item{display:flex;justify-content:space-between;gap:10px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01)}
-  @media(min-width:900px){ .wrap{grid-template-columns:repeat(2,1fr);} .col{min-width:0} }
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  padding:0;
+  background:#f0f2f5;
+  display:flex;
+  justify-content:center;
+}
+
+.container{
+  width:95%;
+  max-width:420px;
+  margin-top:20px;
+  text-align:center;
+}
+
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 0 12px rgba(0,0,0,0.1);
+  margin-bottom:18px;
+}
+
+#wheelCanvas{
+  margin-top:10px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  font-size:17px;
+  border-radius:10px;
+  background:#007bff;
+  color:white;
+  margin-top:10px;
+  cursor:pointer;
+}
+
+button:active{ background:#005fcc; }
+
+#result{
+  font-size:20px;
+  font-weight:600;
+  margin-top:12px;
+}
+
+/* Customize box */
+#editorSection{
+  display:none;
+  margin-top:10px;
+  background:#ffffff;
+  padding:12px;
+  border-radius:10px;
+  box-shadow:0 0 8px rgba(0,0,0,0.1);
+}
+
+textarea{
+  width:100%;
+  height:120px;
+  padding:10px;
+  border-radius:8px;
+  font-size:14px;
+  border:1px solid #ccc;
+}
+
+/* Monetag Ad Placeholder */
+#monetagAd{
+  width:100%;
+  margin:15px 0;
+  text-align:center;
+}
 </style>
 
-<!-- Monetag SDK (core) -->
+<!-- Monetag SDK -->
 <script src='//libtl.com/sdk.js' data-zone='10258271' data-sdk='show_10258271'></script>
+
 </head>
+
 <body>
-<div class="wrap">
+<div class="container">
 
-  <!-- Header -->
-  <div class="card header" style="grid-column:1/-1;">
-    <div class="logo">SS</div>
-    <div>
-      <h1>Spin Studio</h1>
-      <div class="muted">2 Wheels • Coins Wallet • Leaderboard • Monetag integrated</div>
+  <div class="card">
+    <h2>🎡 Spin Studio</h2>
+    <canvas id="wheelCanvas" width="300" height="300"></canvas>
+
+    <button onclick="spinWheel()">SPIN</button>
+
+    <!-- Monetag Banner Ad -->
+    <div id="monetagAd">
+      <p style="color:#aaa; font-size:14px;">Loading ads...</p>
     </div>
-    <div style="margin-left:auto;text-align:right">
-      <div class="wallet" style="min-width:170px">
-        <div>
-          <div style="font-size:13px;color:var(--muted)">Wallet</div>
-          <div id="coinCount" style="font-weight:800;font-size:18px">0 ⭑</div>
-        </div>
-        <div>
-          <button class="small-btn" onclick="copyWallet()">Copy</button>
-        </div>
-      </div>
-      <div style="margin-top:8px" class="muted">Local-only wallet (no user data)</div>
+
+    <!-- Customize Wheel Button -->
+    <button id="toggleEditor" onclick="toggleEditorSection()">Customize Wheel ▼</button>
+    <div id="editorSection">
+      <textarea id="customSegments">Reward 1
+Reward 2
+Reward 3
+Reward 4
+Reward 5
+Reward 6</textarea>
+      <button onclick="applyCustomSegments()">Apply Changes</button>
     </div>
+
+    <div id="result">Result will appear here…</div>
+
+    <!-- Reward Ad Button -->
+    <button onclick="watchRewardedAd()">Watch Ad & Get Extra Spin</button>
+
   </div>
-
-  <!-- Wheel 1 (Fun Wheel) -->
-  <div class="card col">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <strong>Wheel 1 — Fun Wheel (custom)</strong>
-      <small class="muted">Customize and spin for fun results</small>
-    </div>
-
-    <canvas id="wheel1" width="500" height="500"></canvas>
-
-    <div class="controls">
-      <button onclick="spinWheel(1)">SPIN WHEEL 1</button>
-      <button class="small-btn" onclick="openEditor(1)">Edit Wheel 1</button>
-      <small class="muted">Big spin effect</small>
-    </div>
-
-    <div style="margin-top:10px">
-      <div id="result1" class="muted">Result: —</div>
-    </div>
-
-    <div style="margin-top:12px">
-      <div class="muted">History:</div>
-      <div id="history1" class="history-list"></div>
-    </div>
-  </div>
-
-  <!-- Wheel 2 (Coin Wheel) -->
-  <div class="card col">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <strong>Wheel 2 — Coin Wheel</strong>
-      <small class="muted">Spin to win coins (adds to Wallet)</small>
-    </div>
-
-    <canvas id="wheel2" width="500" height="500"></canvas>
-
-    <div class="controls">
-      <button onclick="spinWheel(2)">SPIN WHEEL 2</button>
-      <button class="small-btn" onclick="openEditor(2)">Edit Wheel 2</button>
-      <button class="small-btn" onclick="watchRewardedAd()">Watch Ad → Extra Spin</button>
-    </div>
-
-    <div style="margin-top:10px">
-      <div id="result2" class="muted">Result: —</div>
-    </div>
-
-    <div style="margin-top:12px">
-      <div class="muted">History:</div>
-      <div id="history2" class="history-list"></div>
-    </div>
-  </div>
-
-  <!-- Editor / Leaderboard / Monetag area -->
-  <div class="card col" id="editorCard">
-    <strong>Editor (Customize segments)</strong>
-    <div style="margin-top:8px" class="muted">Wheel 1 segments (one per line)</div>
-    <textarea id="editor1"></textarea>
-    <div style="margin-top:8px"><button onclick="applyEditor(1)">Apply Wheel 1</button></div>
-
-    <div style="margin-top:12px" class="muted">Wheel 2 segments (coins or text)</div>
-    <textarea id="editor2"></textarea>
-    <div style="margin-top:8px"><button onclick="applyEditor(2)">Apply Wheel 2</button></div>
-
-    <div style="margin-top:14px">
-      <strong>Leaderboard (local — add your name)</strong>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <input id="playerName" placeholder="Your name" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit"/>
-        <button onclick="addToLeaderboard()">Add Score</button>
-      </div>
-      <div style="margin-top:10px" class="leaderboard" id="leaderboardList"></div>
-      <div style="margin-top:8px" class="muted">Use /weekly_top5 command on server to distribute manual rewards — here you can export top5.</div>
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <button class="small-btn" onclick="exportTop5()">Export Top5</button>
-        <button class="small-btn" onclick="clearLeaderboard()">Clear LB</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Monetag banner placeholder and info -->
-  <div class="card col" id="monetagCard" style="align-items:center">
-    <strong>Ads (Monetag)</strong>
-    <div id="monetagAd" style="width:100%;margin-top:10px;text-align:center;color:var(--muted)">Banner (loading)...</div>
-    <div style="margin-top:10px" class="muted">Integrated: banner + rewarded popup + in-app interstitial (configured)</div>
-  </div>
-
 </div>
 
-<!-- WIN SOUND -->
-<audio id="winTone" src="https://assets.mixkit.co/sfx/download/mixkit-retro-arcade-bling-210.wav"></audio>
+<audio id="winSound" src="https://assets.mixkit.co/sfx/download/mixkit-small-win-2020.wav"></audio>
 
 <script>
-/* -----------------------
-  Helper: local storage keys
--------------------------*/
-const KEY_WALLET = 'ss_wallet_v1';
-const KEY_HISTORY1 = 'ss_hist1_v1';
-const KEY_HISTORY2 = 'ss_hist2_v1';
-const KEY_LB = 'ss_leader_v1';
+// ================== Spin Wheel ==================
+let segments = ["Reward 1","Reward 2","Reward 3","Reward 4","Reward 5","Reward 6"];
+let startAngle = 0;
+let spinTimeout = null;
+let arc = Math.PI / (segments.length / 2);
+let ctx = document.getElementById("wheelCanvas").getContext("2d");
+let userSpins = 0;
 
-/* -----------------------
-  Utility functions
--------------------------*/
-function readJSON(k, fallback){ try{const v=localStorage.getItem(k); return v?JSON.parse(v):fallback;}catch(e){return fallback;} }
-function writeJSON(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+function drawWheel(){
+  const colors=["#FF6F61","#6B5B95","#88B04B","#F7CAC9","#92A8D1","#955251"];
+  const canvas=document.getElementById("wheelCanvas");
 
-/* -----------------------
-  Wallet
--------------------------*/
-function getWallet(){ return readJSON(KEY_WALLET, {coins:0}); }
-function saveWallet(w){ writeJSON(KEY_WALLET,w); updateWalletUI(); }
-function updateWalletUI(){
-  const w=getWallet();
-  document.getElementById('coinCount').innerText = `${w.coins} ⭑`;
-}
-function addCoins(n){
-  if(!n || isNaN(n)) return;
-  const w=getWallet();
-  w.coins += Math.round(n);
-  saveWallet(w);
-}
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* copy wallet */
-function copyWallet(){ navigator.clipboard?.writeText('Coins: '+getWallet().coins).then(()=>alert('Wallet copied')) }
+  for(let i=0;i<segments.length;i++){
+    let angle=startAngle + i*arc;
+    ctx.fillStyle=colors[i % colors.length];
 
-/* -----------------------
-  History arrays
--------------------------*/
-let history1 = readJSON(KEY_HISTORY1, []);
-let history2 = readJSON(KEY_HISTORY2, []);
+    ctx.beginPath();
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,150,angle,angle+arc);
+    ctx.lineTo(150,150);
+    ctx.fill();
 
-function pushHistory(slot, value){
-  if(slot===1){ history1.unshift(value); if(history1.length>20) history1.pop(); writeJSON(KEY_HISTORY1,history1); renderHistories(); }
-  else { history2.unshift(value); if(history2.length>20) history2.pop(); writeJSON(KEY_HISTORY2,history2); renderHistories(); }
-}
-function renderHistories(){
-  document.getElementById('history1').innerHTML = history1.map(x=>'<div style="padding:6px;border-bottom:1px dashed rgba(255,255,255,0.02)">'+x+'</div>').join('');
-  document.getElementById('history2').innerHTML = history2.map(x=>'<div style="padding:6px;border-bottom:1px dashed rgba(255,255,255,0.02)">'+x+'</div>').join('');
-}
-
-/* -----------------------
-  Leaderboard local
--------------------------*/
-function readLB(){ return readJSON(KEY_LB, []); }
-function saveLB(arr){ writeJSON(KEY_LB,arr); renderLB(); }
-function renderLB(){
-  const arr = readLB();
-  const el = document.getElementById('leaderboardList');
-  if(!arr.length){ el.innerHTML = '<div class="muted">No entries yet.</div>'; return; }
-  el.innerHTML = arr.slice(0,10).map((u,i)=>`<div class="lb-item"><div>${i+1}. ${u.name}</div><div>${u.coins} ⭑</div></div>`).join('');
-}
-function addToLeaderboard(){
-  const name = (document.getElementById('playerName').value || '').trim();
-  if(!name){ alert('Enter a name'); return; }
-  const coins = getWallet().coins;
-  let arr = readLB();
-  arr.push({name,coins,ts:Date.now()});
-  arr = arr.sort((a,b)=>b.coins - a.coins).slice(0,50);
-  saveLB(arr);
-  alert('Added to leaderboard (local)');
-}
-function exportTop5(){
-  const arr = readLB().slice(0,5);
-  if(!arr.length){ alert('No top players yet'); return; }
-  const text = arr.map((u,i)=>`${i+1}. ${u.name} — ${u.coins} coins`).join('\n');
-  navigator.clipboard?.writeText(text).then(()=>alert('Top5 copied. Paste to your admin chat to manually reward.'));
-}
-function clearLeaderboard(){ if(confirm('Clear leaderboard?')){ saveLB([]); } }
-
-/* -----------------------
-  Wheels: neon theme, two wheels
--------------------------*/
-const wheel1 = document.getElementById('wheel1');
-const w1ctx = wheel1.getContext('2d');
-
-const wheel2 = document.getElementById('wheel2');
-const w2ctx = wheel2.getContext('2d');
-
-/* default segments (editable) */
-let segments1 = ["😂 Funny Joke","🤔 Life Tip","🔥 Trend","🎵 Song Suggestion","✨ Secret","🎯 Dare"];
-let segments2 = ["5","10","15","25","0","50"]; // coin values as strings
-
-/* wheel state */
-let angle1 = 0, spinning1=false;
-let angle2 = 0, spinning2=false;
-
-/* Draw helper */
-function draw(wctx, segs, angle, neon){
-  const canvas = wctx.canvas;
-  const size = Math.min(canvas.width, canvas.height);
-  const cx = canvas.width/2, cy = canvas.height/2, r = Math.min(cx,cy)-6;
-  wctx.clearRect(0,0,canvas.width,canvas.height);
-  const arc = (2*Math.PI)/segs.length;
-  for(let i=0;i<segs.length;i++){
-    const a = angle + i*arc;
-    wctx.beginPath();
-    const g = wctx.createLinearGradient(cx + Math.cos(a)*r*0.6, cy + Math.sin(a)*r*0.6, cx, cy);
-    g.addColorStop(0, neon[0]);
-    g.addColorStop(1, neon[1]);
-    wctx.fillStyle = g;
-    wctx.moveTo(cx,cy);
-    wctx.arc(cx,cy,r,a,a+arc);
-    wctx.closePath();
-    wctx.fill();
-    // text
-    wctx.save();
-    wctx.translate(cx,cy);
-    wctx.rotate(a + arc/2);
-    wctx.fillStyle = '#fff';
-    wctx.font = Math.max(12, r*0.10)+'px Arial';
-    wctx.textAlign = 'center';
-    wctx.fillText(segs[i], r*0.55, 5);
-    wctx.restore();
+    ctx.save();
+    ctx.translate(150,150);
+    ctx.rotate(angle + arc/2);
+    ctx.fillStyle="white";
+    ctx.font="16px Arial";
+    ctx.fillText(segments[i],50,5);
+    ctx.restore();
   }
-  // pointer
-  wctx.fillStyle = '#fff';
-  wctx.beginPath();
-  wctx.moveTo(cx, cy - r - 6);
-  wctx.lineTo(cx-10, cy - r + 12);
-  wctx.lineTo(cx+10, cy - r + 12);
-  wctx.closePath();
-  wctx.fill();
+
+  ctx.fillStyle="black";
+  ctx.beginPath();
+  ctx.moveTo(150,0);
+  ctx.lineTo(140,25);
+  ctx.lineTo(160,25);
+  ctx.closePath();
+  ctx.fill();
 }
 
-/* initial draw */
-function redrawAll(){
-  draw(w1ctx, segments1, angle1, ['#6C63FF','#00C2FF']); // neon purple-blue
-  draw(w2ctx, segments2, angle2, ['#00C2FF','#6C63FF']); // reverse gradient
+let spinAngleStart = 0;
+let spinTime = 0;
+let spinTotal = 0;
+
+function spinWheel(){
+  spinAngleStart = Math.random()*10 + 15;
+  spinTime = 0;
+  spinTotal = Math.random()*3000 + 4000;
+  rotateWheel();
 }
-redrawAll();
 
-/* Spin mechanics (same easing) */
-function easeOut(t,b,c,d){ t/=d; return -c * t*(t-2) + b; }
+function rotateWheel(){
+  spinTime += 20;
+  if(spinTime >= spinTotal){
+    stopRotateWheel();
+    return;
+  }
 
-function spinWheel(which){
-  if(which===1){
-    if(spinning1) return;
-    spinning1=true;
-    const start = Math.random()*10 + 12;
-    let t=0, total = Math.random()*2600 + 3200;
-    const tick = ()=> {
-      t += 20;
-      if(t>=total){ stopSpin1(); return; }
-      const ang = start - easeOut(t,0,start,total);
-      angle1 += ang * Math.PI/180;
-      redrawAll();
-      setTimeout(tick,20);
-    };
-    tick();
+  let spinAngle = spinAngleStart - easeOut(spinTime,0,spinAngleStart,spinTotal);
+  startAngle += (spinAngle * Math.PI/180);
+  drawWheel();
+  spinTimeout = setTimeout(rotateWheel,20);
+}
+
+function stopRotateWheel(){
+  clearTimeout(spinTimeout);
+  let degrees = startAngle * 180 / Math.PI + 90;
+  let index = Math.floor((360 - (degrees % 360)) / (360 / segments.length));
+
+  document.getElementById("result").innerText = "🎉 You Won: " + segments[index];
+  document.getElementById("winSound").play();
+}
+
+function easeOut(t,b,c,d){
+  t/=d;
+  return -c * t*(t-2) + b;
+}
+
+/* Apply custom */
+function applyCustomSegments(){
+  let txt = document.getElementById("customSegments").value.trim();
+  segments = txt.split("\n").filter(x => x.trim() !== "");
+  arc = Math.PI / (segments.length/2);
+  drawWheel();
+}
+
+/* Toggle */
+function toggleEditorSection(){
+  const box=document.getElementById("editorSection");
+  const btn=document.getElementById("toggleEditor");
+
+  if(box.style.display==="none"){
+    box.style.display="block";
+    btn.innerText="Customize Wheel ▼";
   } else {
-    if(spinning2) return;
-    spinning2=true;
-    const start = Math.random()*12 + 18;
-    let t=0, total = Math.random()*2600 + 3200;
-    const tick = ()=> {
-      t += 20;
-      if(t>=total){ stopSpin2(); return; }
-      const ang = start - easeOut(t,0,start,total);
-      angle2 += ang * Math.PI/180;
-      redrawAll();
-      setTimeout(tick,20);
-    };
-    tick();
+    box.style.display="none";
+    btn.innerText="Customize Wheel ▲";
   }
 }
 
-/* On stop, calculate winner and apply actions */
-function stopSpin1(){
-  spinning1=false;
-  // compute index
-  const arc = (2*Math.PI)/segments1.length;
-  const deg = angle1 % (2*Math.PI);
-  const idx = Math.floor((2*Math.PI - deg + arc/2) / arc) % segments1.length;
-  const win = segments1[idx];
-  document.getElementById('result1').innerText = 'Result: ' + win;
-  document.getElementById('winTone').play();
-  pushHistory(1, win);
-}
+drawWheel();
 
-function stopSpin2(){
-  spinning2=false;
-  const arc = (2*Math.PI)/segments2.length;
-  const deg = angle2 % (2*Math.PI);
-  const idx = Math.floor((2*Math.PI - deg + arc/2) / arc) % segments2.length;
-  const win = segments2[idx];
-  document.getElementById('result2').innerText = 'Result: ' + win;
-  document.getElementById('winTone').play();
-  pushHistory(2, win);
-  // parse coin reward
-  const parsed = parseInt(win.replace(/[^\d\-]/g,'')); // extract number
-  if(!isNaN(parsed) && parsed>0){
-    addCoins(parsed);
-    renderHistories();
-  }
-}
-
-/* -----------------------
-  Editor open / apply
--------------------------*/
-function openEditor(which){
-  document.getElementById('editorCard').scrollIntoView({behavior:'smooth'});
-  if(which===1) document.getElementById('editor1').value = segments1.join('\n');
-  else document.getElementById('editor2').value = segments2.join('\n');
-}
-function applyEditor(which){
-  if(which===1){
-    const txt = document.getElementById('editor1').value.trim();
-    segments1 = txt.split('\n').filter(x=>x.trim()!=='');
-  } else {
-    const txt = document.getElementById('editor2').value.trim();
-    segments2 = txt.split('\n').filter(x=>x.trim()!=='');
-  }
-  redrawAll();
-  alert('Applied');
-}
-
-/* -----------------------
-  History & LB render
--------------------------*/
-renderHistories();
-renderLB();
-updateWalletUI();
-
-/* -----------------------
-  Monetag integrations (C option)
-   - Banner: SDK script auto loads into page (monetagAd div)
-   - Rewarded popup: show_10258271('pop')
-   - Rewarded interstitial: show_10258271().then(...)
-   - In-app interstitial: initInAppAds()
--------------------------*/
-
-/* Safely call sdk functions (they exist only when monetag SDK is available) */
-function safeShowRewardedPopup(){
-  try{
-    if(typeof show_10258271 === 'function'){
-      return show_10258271('pop');
-    } else return Promise.reject('SDK not loaded');
-  }catch(e){ return Promise.reject(e); }
-}
-function safeShowRewardedInterstitial(){
-  try{
-    if(typeof show_10258271 === 'function'){
-      return show_10258271();
-    } else return Promise.reject('SDK not loaded');
-  }catch(e){ return Promise.reject(e); }
-}
-
-/* Reward ad button (Watch ad → give extra spin on wheel2) */
+// ================== Rewarded Popup ==================
 function watchRewardedAd(){
-  safeShowRewardedPopup().then(()=>{
-    // reward: give one extra wheel2 spin (we represent as coin +5)
-    addCoins(5);
-    alert('Thanks! You earned 5 coins and +1 extra spin (auto added).');
-  }).catch(e=>{
-    console.log('Reward popup failed', e);
-    alert('Ad unavailable — try again later.');
+  show_10258271('pop').then(() => {
+      userSpins++;
+      alert('🎉 You earned 1 extra spin!');
+  }).catch(e => {
+      console.log('Ad not watched or error occurred', e);
   });
 }
 
-/* Example rewarded interstitial usage: show ad then give more coins */
-function showRewardedInterstitialReward(){
-  safeShowRewardedInterstitial().then(()=>{
-    addCoins(15);
-    alert('Thank you — you earned 15 coins!');
-  }).catch(e=>{
-    console.log('Rewarded interstitial failed', e);
-  });
-}
-
-/* In-App Interstitial Init (auto ads) */
-function initInAppAds(){
-  try{
-    if(typeof show_10258271 === 'function'){
-      show_10258271({
-        type: 'inApp',
-        inAppSettings: {
-          frequency: 2,
-          capping: 0.1,
-          interval: 30,
-          timeout: 5,
-          everyPage: false
-        }
-      });
-    } else {
-      console.log('Monetag inApp not available (SDK missing)');
+// ================== In-App Interstitial ==================
+function initInAppAds() {
+  show_10258271({
+    type: 'inApp',
+    inAppSettings: {
+      frequency: 2,    // 2 ads max
+      capping: 0.1,    // within 6 minutes
+      interval: 30,    // 30 sec gap
+      timeout: 5,      // 5 sec delay
+      everyPage: false // session not reset on page change
     }
-  } catch(e){ console.log('initInAppAds error', e); }
+  });
 }
 
-/* call init (safe) */
-setTimeout(()=>{ initInAppAds(); }, 1200);
-
-/* -----------------------
-  Optional: show a rewarded interstitial after certain coin milestones
--------------------------*/
-function maybeShowInterstitialAfterCoins(){
-  const w = getWallet();
-  if(w.coins >= 100 && w.coins % 100 === 0){
-    // try show once
-    safeShowRewardedInterstitial().then(()=> console.log('Rewarded interstitial shown')).catch(()=>{});
-  }
-}
-
-/* update runs when wallet changes */
-(function overrideSaveWallet(){
-  const old = saveWallet;
-  saveWallet = function(w){ writeJSON(KEY_WALLET,w); updateWalletUI(); maybeShowInterstitialAfterCoins(); };
-})();
+initInAppAds();
 
 </script>
 </body>
